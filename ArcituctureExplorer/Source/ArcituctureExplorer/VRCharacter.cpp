@@ -2,18 +2,22 @@
 
 #include "VRCharacter.h"
 #include "Camera/CameraComponent.h"
-
+#include "Components/StaticMeshComponent.h"
 // Sets default values
+// #define OUT
 AVRCharacter::AVRCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
 	VRRoot = CreateDefaultSubobject<USceneComponent>("RootComp");
 	VRRoot->SetupAttachment(GetRootComponent());
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComp");
 	CameraComp->SetupAttachment(VRRoot);
 	
+	DestinationMarker = CreateDefaultSubobject<UStaticMeshComponent>("DestinationMarker");
+	DestinationMarker->SetupAttachment(GetRootComponent());
 	
 }
 
@@ -32,6 +36,7 @@ void AVRCharacter::Tick(float DeltaTime)
 	NewCameraOffset.Z = 0;
 	AddActorWorldOffset(NewCameraOffset);
 	VRRoot->AddWorldOffset(NewCameraOffset);
+	UpdateDestinationMarker();
 }
 
 // Called to bind functionality to input
@@ -55,5 +60,21 @@ void AVRCharacter::MoveRight(float value)
 	
 		AddMovementInput(value*CameraComp->GetRightVector());
 	
+}
+
+void AVRCharacter::UpdateDestinationMarker()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		FHitResult Hit;
+		FVector Start = CameraComp->GetComponentLocation();
+		FVector End = Start + CameraComp->GetForwardVector()*MaxTeleportDistance;
+		bool bHit=World->LineTraceSingleByChannel(Hit, Start, End, ECollisionChannel::ECC_Visibility);
+		if (bHit)
+		{
+			DestinationMarker->SetWorldLocation(Hit.Location);
+		}
+	}
 }
 
