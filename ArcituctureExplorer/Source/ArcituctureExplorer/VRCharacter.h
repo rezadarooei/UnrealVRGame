@@ -26,8 +26,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void MoveForward(float value);
-	void MoveRight(float value);
+	
 
 	void UpdateDestinationMarker();
 
@@ -40,4 +39,15 @@ private:
 	class UStaticMeshComponent* DestinationMarker;
 	UPROPERTY(EditAnywhere)
 	float MaxTeleportDistance = 1000;
+
+	UPROPERTY(EditAnywhere)
+	float TeleportFadeTime = 1.f;
+	UPROPERTY()
+	APlayerCameraManager * PlayerCameraManager;
+	FTimerHandle FadeTimerHandle;
+
+	void MoveForward(float value);
+	void MoveRight(float value);
+	void BeginTeleport();
+	void EndTeleport();
 };

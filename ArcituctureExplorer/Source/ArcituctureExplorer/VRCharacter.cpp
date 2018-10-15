@@ -2,7 +2,11 @@
 
 #include "VRCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Camera/PlayerCameraManager.h"
+#include "DrawDebugHelpers.h"
 #include "Components/StaticMeshComponent.h"
+#include "TimerManager.h"
+#include "Components/CapsuleComponent.h"
 // Sets default values
 // #define OUT
 AVRCharacter::AVRCharacter()
@@ -35,8 +39,30 @@ void AVRCharacter::Tick(float DeltaTime)
 	FVector NewCameraOffset = CameraComp->GetComponentLocation() - GetActorLocation();
 	NewCameraOffset.Z = 0;
 	AddActorWorldOffset(NewCameraOffset);
-	VRRoot->AddWorldOffset(NewCameraOffset);
+	VRRoot->AddWorldOffset(-NewCameraOffset);
 	UpdateDestinationMarker();
+}
+void AVRCharacter::UpdateDestinationMarker()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		FVector Start = CameraComp->GetComponentLocation();
+		FVector End = Start + CameraComp->GetForwardVector()*MaxTeleportDistance;
+		FHitResult Hit;
+		
+		bool bHit = World->LineTraceSingleByChannel(Hit, Start, End, ECollisionChannel::ECC_Visibility);
+		DrawDebugCylinder(World, Start, End, 20.f, 8, FColor::Red, true);
+		if (bHit)
+		{
+			DestinationMarker->SetVisibility(true);
+			DestinationMarker->SetWorldLocation(Hit.Location);
+		}
+		else
+		{
+			DestinationMarker->SetVisibility(false);
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -45,6 +71,7 @@ void AVRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	PlayerInputComponent->BindAxis("Forward", this, &AVRCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Right", this, &AVRCharacter::MoveRight);
+	PlayerInputComponent->BindAction("Teleport", IE_Released, this,&AVRCharacter::BeginTeleport);
 }
 
 void AVRCharacter::MoveForward(float value)
@@ -62,24 +89,26 @@ void AVRCharacter::MoveRight(float value)
 	
 }
 
-void AVRCharacter::UpdateDestinationMarker()
+void AVRCharacter::BeginTeleport()
 {
-	UWorld* World = GetWorld();
-	if (World)
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC) 
 	{
-		FHitResult Hit;
-		FVector Start = CameraComp->GetComponentLocation();
-		FVector End = Start + CameraComp->GetForwardVector()*MaxTeleportDistance;
-		bool bHit=World->LineTraceSingleByChannel(Hit, Start, End, ECollisionChannel::ECC_Visibility);
-		if (bHit)
-		{
-			DestinationMarker->SetVisibility(true);
-			DestinationMarker->SetWorldLocation(Hit.Location);
-		}
-		else
-		{
-			DestinationMarker->SetVisibility(false);
-		}
+		PC->PlayerCameraManager->StartCameraFade(0, 1, TeleportFadeTime, FLinearColor::Black);
+
+		
 	}
+	GetWorldTimerManager().SetTimer(FadeTimerHandle, this, &AVRCharacter::EndTeleport,TeleportFadeTime);
 }
+
+void AVRCharacter::EndTeleport()
+{
+	
+	SetActorLocation(DestinationMarker->GetComponentLocation() + GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
+
+	APlayerController* PC = Cast<APlayerController>(GetController());
+
+	PC->PlayerCameraManager->StartCameraFade(1, 0, TeleportFadeTime, FLinearColor::Black);
+}
+
 
