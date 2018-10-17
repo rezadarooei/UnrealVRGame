@@ -42,12 +42,28 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float TeleportFadeTime = 1.f;
+
 	UPROPERTY()
 	APlayerCameraManager * PlayerCameraManager;
+
 	FTimerHandle FadeTimerHandle;
+
+	UPROPERTY(EditAnywhere)
+	FVector TeleportPorjectionExtetnt=FVector(100, 100, 100);
+
+	UPROPERTY()
+	class UPostProcessComponent* PostProcessComponent;
+
+	UPROPERTY(EditAnywhere)
+	class UMaterialInterface * BlinkerMaterialBase;
+
+	UPROPERTY()
+	class UMaterialInstanceDynamic* BlinkerMaterialInstance;
 
 	void MoveForward(float value);
 	void MoveRight(float value);
 	void BeginTeleport();
 	void EndTeleport();
+	bool FindTeleportDestination(FVector &OUTLocation);
+	void StartFade(float FromAlpha, float ToAlpha);
 };
