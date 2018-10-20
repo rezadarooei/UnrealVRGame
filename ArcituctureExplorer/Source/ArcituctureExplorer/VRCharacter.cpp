@@ -10,6 +10,7 @@
 #include "NavigationSystem.h"
 #include "Components/PostProcessComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Curves/CurveFloat.h"
 // Sets default values
 // #define OUT
 AVRCharacter::AVRCharacter()
@@ -28,7 +29,8 @@ AVRCharacter::AVRCharacter()
 
 	PostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>("PostProcessingComponent");
 	PostProcessComponent->SetupAttachment(GetRootComponent());
-	
+
+	//RadiusVsVelocity=CreateDefaultSubobject<UCurveFloat>("Curve component");
 }
 
 // Called when the game starts or when spawned
@@ -41,7 +43,6 @@ void AVRCharacter::BeginPlay()
 
 		BlinkerMaterialInstance = UMaterialInstanceDynamic::Create(BlinkerMaterialBase, this);
 		PostProcessComponent->AddOrUpdateBlendable(BlinkerMaterialInstance);
-		BlinkerMaterialInstance->SetScalarParameterValue(TEXT("Radius"), .2);
 	}
 }
 
@@ -54,6 +55,8 @@ void AVRCharacter::Tick(float DeltaTime)
 	AddActorWorldOffset(NewCameraOffset);
 	VRRoot->AddWorldOffset(-NewCameraOffset);
 	UpdateDestinationMarker();
+	
+	UpdateBlinkers();
 }
 
 bool AVRCharacter::FindTeleportDestination(FVector &OUTLocation)
@@ -77,6 +80,51 @@ bool AVRCharacter::FindTeleportDestination(FVector &OUTLocation)
 	}
 	return true;
 }
+
+
+void AVRCharacter::UpdateBlinkers()
+{
+	if (RadiusVsVelocity == nullptr) { return; }
+	float Speed = GetVelocity().Size();
+	float Radius = RadiusVsVelocity->GetFloatValue(Speed);
+	BlinkerMaterialInstance->SetScalarParameterValue(TEXT("Radius"), Radius);
+	FVector2D Centre = Getblinkercentre();
+	BlinkerMaterialInstance->SetVectorParameterValue(TEXT("centre"), FLinearColor(Centre.X,Centre.Y,0));
+}
+
+
+FVector2D AVRCharacter::Getblinkercentre()
+{
+	FVector MovemntDrection = GetVelocity().GetSafeNormal();
+	if (MovemntDrection.IsNearlyZero()) {
+		return FVector2D(.5, .5);
+	}
+	FVector WorldStationaryLocation;
+	if(FVector::DotProduct(CameraComp->GetForwardVector(), MovemntDrection) > 0)
+	{
+		WorldStationaryLocation = CameraComp->GetComponentLocation() + MovemntDrection * 1000; 
+	}
+	else
+	{
+		WorldStationaryLocation = CameraComp->GetComponentLocation() - MovemntDrection * 1000;
+	}
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC == nullptr)
+	{
+		return FVector2D(.5, .5);
+	}
+	FVector2D ScreenStaionarylocation;
+	PC->ProjectWorldLocationToScreen
+	(
+		WorldStationaryLocation,
+		ScreenStaionarylocation);
+	int32 SizeX, SizeY;
+	PC->GetViewportSize(SizeX, SizeY);
+	ScreenStaionarylocation.X /= SizeX;
+	ScreenStaionarylocation.Y /= SizeY;
+	return ScreenStaionarylocation;
+}
+
 void AVRCharacter::UpdateDestinationMarker()
 {
 	

@@ -33,10 +33,13 @@ public:
 private:
 	UPROPERTY()
 	class UCameraComponent* CameraComp;
+
 	UPROPERTY()
 	class USceneComponent* VRRoot;
+
 	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* DestinationMarker;
+
 	UPROPERTY(EditAnywhere)
 	float MaxTeleportDistance = 1000;
 
@@ -60,10 +63,17 @@ private:
 	UPROPERTY()
 	class UMaterialInstanceDynamic* BlinkerMaterialInstance;
 
+	UPROPERTY(EditAnywhere)
+	class UCurveFloat* RadiusVsVelocity;
+
+
+private:
 	void MoveForward(float value);
 	void MoveRight(float value);
 	void BeginTeleport();
 	void EndTeleport();
 	bool FindTeleportDestination(FVector &OUTLocation);
 	void StartFade(float FromAlpha, float ToAlpha);
+	void UpdateBlinkers();
+	FVector2D Getblinkercentre();
 };
