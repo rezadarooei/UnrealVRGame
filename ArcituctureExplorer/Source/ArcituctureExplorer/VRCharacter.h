@@ -38,10 +38,17 @@ private:
 	class USceneComponent* VRRoot;
 
 	UPROPERTY(VisibleAnywhere)
+	class USplineComponent* TelePath;
+
+	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* DestinationMarker;
 
 	UPROPERTY(EditAnywhere)
-	float MaxTeleportDistance = 1000;
+	float TeleportProjctileSpeed = 800;
+
+
+	UPROPERTY(EditAnywhere)
+	float MaxSimulationTime = 1;
 
 	UPROPERTY(EditAnywhere)
 	float TeleportFadeTime = 1.f;
@@ -65,15 +72,40 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	class UCurveFloat* RadiusVsVelocity;
+ 
+  	UPROPERTY()
+  	class UMotionControllerComponent* LeftHandController;
+  
+  	UPROPERTY(VisibleAnywhere)
+  	class UStaticMeshComponent* LeftHandControllerMesh;
+  
+  	UPROPERTY()
+  	class UMotionControllerComponent* RightHandController;
+  
+  	UPROPERTY(VisibleAnywhere)
+  	class UStaticMeshComponent* RighHandControllerMesh;
 
+	UPROPERTY(EditAnywhere)
+	float TeleportProjctileRadius = 10;
+
+	UPROPERTY()
+	 TArray<class USplineMeshComponent*> TeleportDynamicMeshPool;
+
+ 	UPROPERTY(EditDefaultsOnly)
+ 	class UStaticMesh* TelePortArchMesh;
+ 
+ 	UPROPERTY(EditDefaultsOnly)
+ 	class UMaterialInterface* TeleportArchMaterial;
 
 private:
 	void MoveForward(float value);
 	void MoveRight(float value);
 	void BeginTeleport();
 	void EndTeleport();
-	bool FindTeleportDestination(FVector &OUTLocation);
+	bool FindTeleportDestination(TArray<FVector> &OUTPath, FVector &OUTLocation);
 	void StartFade(float FromAlpha, float ToAlpha);
 	void UpdateBlinkers();
 	FVector2D Getblinkercentre();
+	void UpdateSplines(const TArray<FVector> &Path);
+	void DrawTeleportPath(const TArray<FVector> &Path);
 };
