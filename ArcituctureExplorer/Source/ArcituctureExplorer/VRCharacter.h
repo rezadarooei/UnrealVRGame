@@ -31,6 +31,7 @@ public:
 	void UpdateDestinationMarker();
 
 private:
+	//camera for character
 	UPROPERTY()
 	class UCameraComponent* CameraComp;
 
@@ -50,6 +51,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	float MaxSimulationTime = 1;
 
+	//person fade after 1 sec
 	UPROPERTY(EditAnywhere)
 	float TeleportFadeTime = 1.f;
 
@@ -64,9 +66,10 @@ private:
 	UPROPERTY()
 	class UPostProcessComponent* PostProcessComponent;
 
+	//MaterialInterface is like normal material, but it can be used to create Dynamic material
 	UPROPERTY(EditAnywhere)
 	class UMaterialInterface * BlinkerMaterialBase;
-
+	//MaterialInstanceDynamic is the final material we apply into our mesh
 	UPROPERTY()
 	class UMaterialInstanceDynamic* BlinkerMaterialInstance;
 
@@ -74,28 +77,30 @@ private:
 	class UCurveFloat* RadiusVsVelocity;
  
   	UPROPERTY()
-  	class UMotionControllerComponent* LeftHandController;
+  	class AHandController* LeftHandController;
   
-  	UPROPERTY(VisibleAnywhere)
-  	class UStaticMeshComponent* LeftHandControllerMesh;
+  
   
   	UPROPERTY()
-  	class UMotionControllerComponent* RightHandController;
+  	class AHandController* RightHandController;
   
-  	UPROPERTY(VisibleAnywhere)
-  	class UStaticMeshComponent* RighHandControllerMesh;
+  	
 
 	UPROPERTY(EditAnywhere)
 	float TeleportProjctileRadius = 10;
 
+	//
 	UPROPERTY()
-	 TArray<class USplineMeshComponent*> TeleportDynamicMeshPool;
+	TArray<class USplineMeshComponent*> TeleportDynamicMeshPool;
 
  	UPROPERTY(EditDefaultsOnly)
  	class UStaticMesh* TelePortArchMesh;
  
  	UPROPERTY(EditDefaultsOnly)
  	class UMaterialInterface* TeleportArchMaterial;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AHandController> HandControllerClass;
 
 private:
 	void MoveForward(float value);
@@ -105,6 +110,7 @@ private:
 	bool FindTeleportDestination(TArray<FVector> &OUTPath, FVector &OUTLocation);
 	void StartFade(float FromAlpha, float ToAlpha);
 	void UpdateBlinkers();
+	//it give us blinker center because it changes when we want move around
 	FVector2D Getblinkercentre();
 	void UpdateSplines(const TArray<FVector> &Path);
 	void DrawTeleportPath(const TArray<FVector> &Path);
