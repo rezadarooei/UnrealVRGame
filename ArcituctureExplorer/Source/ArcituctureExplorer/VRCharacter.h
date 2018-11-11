@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "HandController.h"
 #include "VRCharacter.generated.h"
 
 UCLASS()
@@ -77,12 +78,12 @@ private:
 	class UCurveFloat* RadiusVsVelocity;
  
   	UPROPERTY()
-  	class AHandController* LeftHandController;
+  	AHandController* LeftHandController;
   
   
   
   	UPROPERTY()
-  	class AHandController* RightHandController;
+  	AHandController* RightHandController;
   
   	
 
@@ -110,8 +111,14 @@ private:
 	bool FindTeleportDestination(TArray<FVector> &OUTPath, FVector &OUTLocation);
 	void StartFade(float FromAlpha, float ToAlpha);
 	void UpdateBlinkers();
-	//it give us blinker center because it changes when we want move around
+	//it give us blinker center becouse it changes when we want move around
 	FVector2D Getblinkercentre();
 	void UpdateSplines(const TArray<FVector> &Path);
 	void DrawTeleportPath(const TArray<FVector> &Path);
+
+	void GripLeft() { LeftHandController->Grip(); };
+	void ReleaseLeft() { LeftHandController->Release(); };
+
+	void GripRight() { RightHandController->Grip(); };
+	void ReleaseRight() { RightHandController->Release(); };
 };

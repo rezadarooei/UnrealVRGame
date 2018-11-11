@@ -16,7 +16,10 @@ public:
 	// Sets default values for this actor's properties
 	AHandController();
 	void SetHand(EControllerHand Hand) { MotionController->SetTrackingSource(Hand); }
+	void Grip();
+	void Release();
 
+	void PairController(AHandController* Controller);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -37,6 +40,12 @@ private:
 
 	bool bCanClimb = false;
 
+	bool bIsClimbing = false;
+
+	FVector ClimbingStartLocation;
+
 	UPROPERTY(EditDefaultsOnly)
-		class UHapticFeedbackEffect_Base * HapticEffect;
+	class UHapticFeedbackEffect_Base * HapticEffect;
+
+	AHandController* OtherController;
 };
