@@ -16,6 +16,9 @@
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
 #include "HandController.h"
+#include "Grabber.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "Math/TransformNonVectorized.h"
 
 // Sets default values
 // #define OUT
@@ -55,27 +58,37 @@ void AVRCharacter::BeginPlay()
 		BlinkerMaterialInstance = UMaterialInstanceDynamic::Create(BlinkerMaterialBase, this);
 		PostProcessComponent->AddOrUpdateBlendable(BlinkerMaterialInstance);
 	}
-	
+
 
 	LeftHandController = GetWorld()->SpawnActor<AHandController>(HandControllerClass);
-
-	if (LeftHandController) 
+	
+	if (LeftHandController)
 	{
-		LeftHandController->AttachToComponent(VRRoot,FAttachmentTransformRules::KeepRelativeTransform);
+		
+		LeftHandController->AttachToComponent(VRRoot, FAttachmentTransformRules::KeepRelativeTransform);
 		LeftHandController->SetHand(EControllerHand::Left);
+		//LeftHandController->SetActorScale3D(FVector(1, -1, 1));
+// 		FTransform LeftHandTransform=LeftHandController->GetTransform();
+// 		//LeftHandTransform.Mirror(EAxis::Z, EAxis::None);
+// 		LeftHandTransform.Mirror(EAxis::Y, EAxis::Z);
+// 		//LeftHandTransform.Mirror(EAxis::X, EAxis::None);
+// 		LeftHandTransform.Inverse();
+// 		LeftHandController->SetActorTransform(LeftHandTransform);
+		
 	}
 
 	RightHandController = GetWorld()->SpawnActor<AHandController>(HandControllerClass);
 
 	if (RightHandController)
 	{
+		
+		//LeftHandController->SetActorTransform(RightHandTransform);
 		RightHandController->AttachToComponent(VRRoot, FAttachmentTransformRules::KeepRelativeTransform);
 		LeftHandController->SetHand(EControllerHand::Right);
 
 	}
 	LeftHandController->PairController(RightHandController);
-
-
+	//FindPhyicsHandleComponent();
 }
 
 // Called every frame
@@ -83,6 +96,7 @@ void AVRCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//find distance between camera & capsule
+	
 	FVector NewCameraOffset = CameraComp->GetComponentLocation() - GetActorLocation();
 	NewCameraOffset.Z = 0;
 	AddActorWorldOffset(NewCameraOffset);
@@ -90,6 +104,10 @@ void AVRCharacter::Tick(float DeltaTime)
 	UpdateDestinationMarker();
 	
 	UpdateBlinkers();
+// 	FTransform RightHandTransform = RightHandController->GetTransform();
+// 	FRotator Rotion(90, 0, 0);
+// 	FQuat QuatRotation = FQuat(Rotion);
+// 	RightHandTransform.SetRotation(QuatRotation);
 }
 
 bool AVRCharacter::FindTeleportDestination(TArray<FVector> &OUTPath,FVector &OUTLocation)
@@ -180,6 +198,7 @@ void AVRCharacter::DrawTeleportPath(const TArray<FVector> &Path)
 }
 
 
+
 void AVRCharacter::UpdateSplines(const TArray<FVector> &Path)
 {
 	//First we need clear old splines 
@@ -257,6 +276,9 @@ void AVRCharacter::UpdateDestinationMarker()
 }
 
 
+
+
+
 // Called to bind functionality to input
 void AVRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -268,7 +290,8 @@ void AVRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction("GripLeft", IE_Released, this, &AVRCharacter::ReleaseLeft);
 	PlayerInputComponent->BindAction("GripRight", IE_Pressed, this, &AVRCharacter::GripRight);
 	PlayerInputComponent->BindAction("GripRight", IE_Released, this, &AVRCharacter::ReleaseRight);
-
+// 	PlayerInputComponent->BindAction("Grab", IE_Pressed, this, &AVRCharacter::Grab);
+// 	PlayerInputComponent->BindAction("Grab", IE_Released, this, &AVRCharacter::Release);
 }
 
 void AVRCharacter::MoveForward(float value)
@@ -314,6 +337,4 @@ void AVRCharacter::StartFade(float FromAlpha, float ToAlpha)
 
 	}
 }
-
-
 

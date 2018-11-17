@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "HandController.h"
+
 #include "VRCharacter.generated.h"
 
 UCLASS()
@@ -30,6 +31,10 @@ public:
 	
 
 	void UpdateDestinationMarker();
+
+// 	class UPhysicsHandleComponent* Physcs = nullptr;
+// 
+// 	 void FindPhyicsHandleComponent();
 
 private:
 	//camera for character
@@ -103,6 +108,8 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AHandController> HandControllerClass;
 
+	//class UGrabber* Grabber;
+
 private:
 	void MoveForward(float value);
 	void MoveRight(float value);
@@ -111,14 +118,17 @@ private:
 	bool FindTeleportDestination(TArray<FVector> &OUTPath, FVector &OUTLocation);
 	void StartFade(float FromAlpha, float ToAlpha);
 	void UpdateBlinkers();
-	//it give us blinker center becouse it changes when we want move around
+	//it give us blinker center because it changes when we want move around
 	FVector2D Getblinkercentre();
 	void UpdateSplines(const TArray<FVector> &Path);
 	void DrawTeleportPath(const TArray<FVector> &Path);
 
-	void GripLeft() { LeftHandController->Grip(); };
+	void GripLeft() { LeftHandController->Grip();};
 	void ReleaseLeft() { LeftHandController->Release(); };
 
 	void GripRight() { RightHandController->Grip(); };
-	void ReleaseRight() { RightHandController->Release(); };
+	void ReleaseRight() { RightHandController->Release(); }
+// 	void Grab();
+// 	void Release();
+	
 };

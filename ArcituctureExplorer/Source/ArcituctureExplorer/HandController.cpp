@@ -15,6 +15,7 @@ AHandController::AHandController()
 	PrimaryActorTick.bCanEverTick = true;
 	MotionController = CreateDefaultSubobject<UMotionControllerComponent>("MotionController");
 	MotionController->SetupAttachment(MotionController);
+	
 }
 
 // Called when the game starts or when spawned
@@ -64,6 +65,7 @@ void AHandController::Grip()
 
 void AHandController::Release()
 {
+	bIsClimbing = false;
 	if (bIsClimbing) 
 	{
 		bIsClimbing = false;
@@ -93,7 +95,8 @@ void AHandController::ActorBeginOverlap(AActor* OverlappedActor, AActor* OtherAc
 		if (Pawn) 
 		{
 			APlayerController* Controller = Cast<APlayerController>(Pawn->GetController());
-			if (Controller) {
+			if (Controller) 
+			{
 				Controller->PlayHapticEffect(HapticEffect, MotionController->GetTrackingSource());
 			}
 			

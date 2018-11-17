@@ -29,7 +29,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 private:
 	//define parameters
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	 UMotionControllerComponent* MotionController;
 	UFUNCTION()
 	void ActorBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
@@ -48,4 +48,6 @@ private:
 	class UHapticFeedbackEffect_Base * HapticEffect;
 
 	AHandController* OtherController;
+
+	class UGrabber* GrabberComponent;
 };
